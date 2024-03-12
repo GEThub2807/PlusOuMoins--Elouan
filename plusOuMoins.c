@@ -1,167 +1,97 @@
-/* #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 
-int MaxNumber= 0;
-int MinNumber= 0;
-
-int AskInt(){
+int AskInt() { //Vérifie que le joueur entre un numéro//
     int number;
-    while(scanf(" %u", &number) != 1){
-        printf("\nEntrez un nombre positif entier entre %d et %d: ", MinNumber, MaxNumber);
-    }
-}
-
-int AskIntInRange(int min, int  max){
-    unsigned int number;
-    while(true){
-        number= AskInt();
-        if  (number >= min && number <= max){
-            break;
-        }
-        printf("Veuillez inscrire un nombre entre %u et %u: \n" ,min, max);
-    }
-    return number;
-}
-
-int main() {
-    srand( time( NULL ) ); //générateur de random
-
-    printf("Quel sera le plus petit numéro ?");
-    unsigned int Min;
-    Min = AskIntInRange();
-
-    printf("Quel sera le plus grand numéro ?");
-    unsigned int Max;
-    Max = AskIntInRange();
-
-    while( true ) {
-        int UserChoice;
-        int searchedValue = MinNumber + rand() % (MaxNumber + 1); //remplacer les var par 101
-        int Try = 3;
-        printf( " Débug: Valeur secrète == %d\n", searchedValue );
-
-        while( true ) {
-            printf("Veuillez saisir un entier (entre 0 et 100) : " );
-            fflush( stdout );
-            scanf( "%d", & UserChoice );
-            Try--;
-
-            if ( UserChoice == searchedValue ) {
-                printf( "Félicitation : Il vous restait %d essais !\n", Try );
-                break;
-            }
-            if ( UserChoice < searchedValue ) {
-                printf( "La valeur à trouver est plus grande.\n" );
-            } else {
-                printf( "La valeur à trouver est plus petite.\n" );
-            }
-            if Try == 0{
-                printf("Vous aviez 3 essais, dommage, le nombre recherché était %u .", searchedValue);
-                break;
-            }
-        }
-
-        printf( "Souhaitez-vous recommencer une partie (0 Non / 1 Oui) : " );
-        fflush( stdout );
-        scanf( "%d", & editedValue);
-        if ( editedValue == 0 ) break;
-    }
-
-    printf( "Bye bye !\n" );
-
-    return EXIT_SUCCESS;
-}*/
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <time.h>
-
-int AskInt(){
-    int number;
-    int numberError = scanf_s("%d", &number);
-
-    while (number =! 1){
-        if (numberError == 0){
-            printf("Veuillez rentrer un nombre entier positif");
-            return 1;
-        }else{
-            return number;
-        }
-    }
-}
-
-int AskIntInRange(int min, int  max){
-    int number;
-    while(1){
-        number= AskInt();
-        if  (number >= min && number <= max){
-            break;
-        }
-        printf("Veuillez inscrire un nombre entre %u et %u: \n" ,min, max);
-    }
-    return number;
-}
-
-char Replay(){
-    char replay[256];
-    int rError = scanf_s("%s", replay, 256);
-
-    if (rError == 0 || (replay != 'y' && 'n' && 'Y' && 'N')){
-        printf("Veuillez rentrer une réponse valide : y ou n \n");
+    while (scanf_s("%d", &number) != 1) {
+        printf("Veuillez rentrer un nombre entier positif\n");
+        number = getchar(); //clear le buffer//
         return 1;
-    }else{
-        return replay;
+    }
+    return number; 
+}
+
+void Bornes(int* NumMin, int* NumMax) { //Demande au joueurs les bornes du + ou -//
+    printf("Quel sera le plus petit numéro de votre jeu ?\n");
+    *NumMin = AskInt(); //vérifie que le joueur rentre bien un nombre//
+
+    printf("Quel sera le plus grand numéro de votre jeu ?\n");
+    *NumMax = AskInt();
+    while (*NumMin > *NumMax) { //vérifie que la borne maximale est bien supérieure à la minimale//
+        printf("Le nombre minimum doit être inférieur au nombre maximum.\n");
+        *NumMax = getchar();
+        *NumMax = AskInt();
     }
 }
 
+int AskIntInRange(int NumMin, int NumMax) { //vérifie que le joueurs rentre bien un numéro entre les bornes qu'il a définit en amont//
+    int number;
+    while (1) {
+        number = AskInt();
+        if (number >= NumMin && number <= NumMax) {
+            break;
+        }
+        printf("Veuillez inscrire un nombre entre %d et %d: \n", NumMin, NumMax);
+    }
+    return number;
+}
+
+char Replay() { //demande au joueur de rejouer ou non, ou de voir son score//
+    char replay;
+    while (scanf_s("%c", &replay, 1) != 1 || (replay != 'y' && replay != 'n' && replay != 'Y' && replay != 'N' && replay != 'h' && replay != 'H')) { 
+        while( getchar() != '\n' );
+        printf("Veuillez rentrer une réponse valide : y ou n \n");
+    }
+    return replay;
+}
 
 int main() {
+    srand(time(NULL));
 
-    srand( time( NULL ) );
+    int numberToGuess, numMin, numMax, userChoice, essais, historique;
+    char replay;
 
-    while( 1 ) {
-        /*printf("Quel sera le plus petit numéro ?");
-        int min;
-        min = AskIntInRange();
+    while (1) {
+        Bornes(&numMin, &numMax);
+        numberToGuess = rand() % (numMax - numMin + 1) + numMin;
+        essais = 10;
 
-        printf("Quel sera le plus grand numéro ?");
-        int max;
-        max = AskIntInRange();*/
-        int min = 0;
-        int max = 100;
-        int searchedValue = (rand() * (max - min) / RAND_MAX) + min;
-        int editedValue;
-        int Essais = 3;
-        printf("Valeur à trouver == %d\n", searchedValue );
+        printf("J'ai choisi un nombre entre %d et %d, à vous de le trouver !\n", numMin, numMax);
 
-        while(1) {
-            printf( "Veuillez saisir un entier (entre 0 et 100) : " );
-            editedValue = AskInt();
-            Essais--;
+        while (1){
+            printf("Entrez votre idée ! Il vous reste %d essais : ", essais);
+            userChoice = AskIntInRange(numMin, numMax);
+            essais--;
 
-            if ( editedValue == searchedValue ) {
-                printf( "Félicitation : il vous restait %d !\n", Essais );
+            if (userChoice < numberToGuess) {
+                printf("C'est plus !\n");
+            }
+            else if (userChoice > numberToGuess) {
+                printf("C'est moins !\n");
+            }
+            else {
+                printf("Bravo, vous avez trouvé le nombre en %d essais !\n", 3-essais);
                 break;
-            }
-            if ( editedValue < searchedValue ) {
-                printf( "La valeur à trouver est plus grande.\n" );
-            } else {
-                printf( "La valeur à trouver est plus petite.\n" );
-            }
-            if (Essais == 0){
-                printf("Vous aviez 3 essais, dommage, le nombre recherché était %u .", searchedValue);
+            }if (essais == 0){
+                printf("Vous aviez 3 essais, dommage, le nombre recherché était %u .", numberToGuess);
                 break;
             }
         }
 
-        printf( "Souhaitez-vous recommencer une partie (0 Non / 1 Oui) : " );
-        scanf( "%d", & editedValue );
-        if ( editedValue == 0 ) break;
+        printf("Voulez vous rejouer ? Ou voir votre score total ? [y/n/h]");
+        replay = Replay();
+
+        if (replay == 'n' && replay == 'N'){
+            printf( "Bye bye !\n" );
+            return EXIT_SUCCESS;
+        }
+        if (replay != 'y' && replay != 'Y'){
+            break;
+        }
+        if (replay == 'h' && replay == 'H'){
+            printf("Voici l'historique de vos nombres dévinés: \n", historique);
+            Replay();
+        }
     }
-
-    printf( "Bye bye !\n" );
-
-    return EXIT_SUCCESS;
 }
